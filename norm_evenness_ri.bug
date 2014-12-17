@@ -1,0 +1,26 @@
+##
+## logit(evenness) vs categoris with subjID random effect on part of the samples
+## where there are multiple samples per subject
+##
+model
+{
+    for( i in 1 : length(y) )
+    {
+        y[i] ~ dnorm(mu[i], tau[gr[i]])
+        y.rep[i] ~ dnorm(mu[i], tau[gr[i]])
+        mu[i] <- a[gr[i]] + subjIdx[i]*b[subjID[i]]
+        stRes[i] <- (y[i] - mu[i]) * sqrt(tau[gr[i]])
+    }
+
+    for ( i in 1:nGr )
+    {
+        a[i] ~ dnorm(0.0, 1.0E-6)
+        tau[i] ~ dgamma(0.001, 0.001)
+    }
+
+    for ( i in 1:nSubj )
+    {
+        b[i] ~ dnorm(0.0, tau.b)
+    }
+    tau.b ~ dgamma(0.001, 0.001)
+}

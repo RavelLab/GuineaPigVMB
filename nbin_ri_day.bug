@@ -1,0 +1,35 @@
+##
+## negative binomial mixed effects model for the effect of the day in estrous cycle on y
+##
+## Author: Pawel Gajer
+## Oct 25, 2014
+##
+model
+{
+    for(i in 1:length(y))
+    {
+        y[i] ~ dnegbin(p[i],r[i])
+        p[i] <- r[i]/(r[i] + lambda[i])
+        log(lambda[i]) <- a[day[i]] + d[animal[i]]
+        log(r[i]) <-  mur
+        ## standardized residuals
+        stRes[i] <- (y[i] - lambda[i])/sqrt(lambda[i] * (1 + lambda[i]/r[i]) )
+    }
+
+    ## fixed effects
+    prec <- 1.0E-6
+    mur ~ dnorm(0.0, prec)
+
+    ## interaction between treatment and day
+    for ( i in 1:12 )
+    {
+        a[i] ~ dnorm(0.0, prec)T(0,)
+    }
+
+    ## random intercept
+    for ( i in 1:nAnimals )
+    {
+        d[i] ~ dnorm(0.0, tau.d)
+    }
+    tau.d ~ dgamma(0.001, 0.001)
+}
