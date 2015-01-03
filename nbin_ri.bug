@@ -1,0 +1,42 @@
+##
+## negative binomial mixed effects model for the effect of treatment and day in the cycle on y
+##
+## Author: Pawel Gajer
+## Sept 26, 2014
+##
+model
+{
+    eps <- pow(10,-13)
+    for(i in 1:length(y))
+    {
+        y[i] ~ dnegbin(p[i],r[i])
+        p[i] <- r[i]/(r[i] + lambda[i]) + eps
+        log(lambda[i]) <- a[treatment[i],day[i]] + d[animal[i]]
+        log(r[i]) <-  mur[treatment[i]]
+        ## standardized residuals
+        stRes[i] <- (y[i] - lambda[i])/sqrt(lambda[i] * (lambda[i] + r[i]) )
+    }
+
+    ## fixed effects
+    prec <- 1.0E-6
+
+    ## interaction between treatment and day
+    for ( i in 1:12 )
+    {
+        a[1,i] ~ dnorm(0.0, prec)
+        a[2,i] ~ dnorm(0.0, prec)
+        a[3,i] ~ dnorm(0.0, prec)
+    }
+
+    for ( i in 1:3 )
+    {
+        mur[i] ~ dnorm(0.0, prec)
+    }
+
+    ## random intercept
+    for ( i in 1:nAnimals )
+    {
+        d[i] ~ dnorm(0.0, tau.d)
+    }
+    tau.d ~ dgamma(0.001, 0.001)
+}
